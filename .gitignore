@@ -1,0 +1,26 @@
+bin/
+obj/
+.vs/
+.vscode/
+.idea/
+*.user
+*.log
+node_modules/
+dist/
+build/
+out/
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+Thumbs.db
+.DS_Store
+tmp/
+.cache/
+
+# VS / Rider
+*.suo
+*.userprefs
+TestResults/
+*.nupkg
+appsettings.Development.json
