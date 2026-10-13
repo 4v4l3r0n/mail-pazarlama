@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="MailPazarlama.Business/MailPazarlama.Business.csproj" />
+  <Project Path="MailPazarlama.Data/MailPazarlama.Data.csproj" />
+  <Project Path="MailPazarlama.Entities/MailPazarlama.Entities.csproj" />
+  <Project Path="MailPazarlama.Web/MailPazarlama.Web.csproj" />
+</Solution>
