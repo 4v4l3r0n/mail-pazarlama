@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MailPazarlama.Business\MailPazarlama.Business.csproj" />
+    <ProjectReference Include="..\MailPazarlama.Data\MailPazarlama.Data.csproj" />
     <ProjectReference Include="..\MailPazarlama.Entities\MailPazarlama.Entities.csproj" />
   </ItemGroup>
 
