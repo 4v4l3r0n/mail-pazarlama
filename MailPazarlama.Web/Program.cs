@@ -1,4 +1,7 @@
+using MailPazarlama.Business.Services.MailSetting;
+using MailPazarlama.Business.Services.MailTemplate;
 using MailPazarlama.Business.Services.Security;
+using MailPazarlama.Business.Services.Subscriber;
 using MailPazarlama.Business.Services.User;
 using MailPazarlama.Data;
 using MailPazarlama.Data.UnitOfWork;
@@ -14,6 +17,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ISubscriberService, SubscriberService>();
+builder.Services.AddScoped<IMailTemplateService, MailTemplateService>();
+builder.Services.AddScoped<IMailSettingService, MailSettingService>();
 
 var app = builder.Build();
 
