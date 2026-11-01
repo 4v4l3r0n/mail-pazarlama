@@ -1,31 +1,43 @@
-using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MailPazarlama.Web.Models;
+using MailPazarlama.Business.DTOs.Subscriber;
+using MailPazarlama.Business.Services.Subscriber;
 
 namespace MailPazarlama.Web.Controllers;
 
+[AllowAnonymous]
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly ISubscriberService _subscriberService;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ISubscriberService subscriberService)
     {
-        _logger = logger;
+        _subscriberService = subscriberService;
     }
 
+    [HttpGet]
     public IActionResult Index()
     {
-        return View();
+        return View(new SubscriberCreateDto());
     }
 
-    public IActionResult Privacy()
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Index(SubscriberCreateDto dto)
     {
-        return View();
-    }
+        if (!ModelState.IsValid)
+        {
+            return View(dto);
+        }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        var result = await _subscriberService.AddSubscriberAsync(dto);
+        if (result.Success)
+        {
+            TempData["Success"] = result.Message;
+            return RedirectToAction(nameof(Index));
+        }
+
+        TempData["Error"] = result.Message;
+        return View(dto);
     }
 }

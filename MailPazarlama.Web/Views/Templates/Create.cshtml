@@ -1,0 +1,40 @@
+@model MailTemplateCreateDto
+@{
+    ViewData["Title"] = "Yeni Şablon Ekle";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h3 class="card-title mb-4">Yeni Şablon Oluştur</h3>
+
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">Şablon Başlığı</label>
+                        <input asp-for="Title" class="form-control" placeholder="Örn: Haftalık Bülten #1" autofocus />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ContentHtml" class="form-label">E-Posta İçeriği (HTML Destekli)</label>
+                        <textarea asp-for="ContentHtml" class="form-control" rows="10" placeholder="<h2>Merhaba!</h2><p>Haftalık bültenimize hoş geldiniz...</p>"></textarea>
+                        <span asp-validation-for="ContentHtml" class="text-danger small"></span>
+                        <div class="form-text">Şablon içeriğine HTML etiketleri ekleyebilirsiniz.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary">İptal</a>
+                        <button type="submit" class="btn btn-primary">Şablonu Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

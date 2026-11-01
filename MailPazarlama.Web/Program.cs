@@ -5,6 +5,7 @@ using MailPazarlama.Business.Services.Subscriber;
 using MailPazarlama.Business.Services.User;
 using MailPazarlama.Data;
 using MailPazarlama.Data.UnitOfWork;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,15 @@ builder.Services.AddScoped<ISubscriberService, SubscriberService>();
 builder.Services.AddScoped<IMailTemplateService, MailTemplateService>();
 builder.Services.AddScoped<IMailSettingService, MailSettingService>();
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/Login";
+        options.Cookie.Name = "MailPazarlama.Auth";
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -36,6 +46,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

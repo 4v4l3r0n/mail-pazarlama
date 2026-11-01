@@ -1,8 +1,32 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model SubscriberCreateDto
+@{
+    ViewData["Title"] = "Bültenimize Abone Olun";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 text-center">
+                <h3 class="card-title mb-3">Bültenimize Abone Olun</h3>
+                <p class="text-muted mb-4">
+                    En son duyuru, kampanya ve güncellemelerden anında haberdar olmak için e-posta adresinizi bırakın.
+                </p>
+
+                <form asp-action="Index" method="post">
+                    <div class="mb-3 text-start">
+                        <label asp-for="Email" class="form-label">E-Posta Adresiniz</label>
+                        <input asp-for="Email" class="form-control form-control-lg" placeholder="ornek@alanadi.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Abone Ol</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
