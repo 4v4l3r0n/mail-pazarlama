@@ -1,5 +1,7 @@
+using MailPazarlama.Business.Services.MailSender;
 using MailPazarlama.Business.Services.MailSetting;
 using MailPazarlama.Business.Services.MailTemplate;
+using MailPazarlama.Business.Services.Report;
 using MailPazarlama.Business.Services.Security;
 using MailPazarlama.Business.Services.Subscriber;
 using MailPazarlama.Business.Services.User;
@@ -21,6 +23,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ISubscriberService, SubscriberService>();
 builder.Services.AddScoped<IMailTemplateService, MailTemplateService>();
 builder.Services.AddScoped<IMailSettingService, MailSettingService>();
+builder.Services.AddScoped<IMailReportService, MailReportService>();
+builder.Services.AddScoped<IMailSenderService, MailSenderService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

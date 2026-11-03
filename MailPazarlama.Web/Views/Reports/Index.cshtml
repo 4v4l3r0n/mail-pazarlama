@@ -1,0 +1,129 @@
+@model MailPazarlama.Web.Models.ReportsViewModel
+@{
+    ViewData["Title"] = "Gönderim Raporları";
+    var totalCount = Model.Logs.Count;
+    var successCount = Model.Logs.Count(l => l.Status == "Başarılı");
+    var failedCount = Model.Logs.Count(l => l.Status == "Başarısız");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 mb-0">E-Posta Gönderim Raporları</h2>
+    <div>
+        <span class="badge bg-primary fs-6 me-1">Toplam: @totalCount</span>
+        <span class="badge bg-success fs-6 me-1">Başarılı: @successCount</span>
+        <span class="badge bg-danger fs-6">Başarısız: @failedCount</span>
+    </div>
+</div>
+
+<!-- Filtreleme Kartı -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Şablon</label>
+                <select name="TemplateId" class="form-select">
+                    <option value="">-- Tüm Şablonlar --</option>
+                    @foreach (var template in Model.Templates)
+                    {
+                        if (Model.Filter.TemplateId == template.Id)
+                        {
+                            <option value="@template.Id" selected>@template.Title</option>
+                        }
+                        else
+                        {
+                            <option value="@template.Id">@template.Title</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Başlangıç Tarihi</label>
+                <input type="date" name="StartDate" class="form-control"
+                       value="@(Model.Filter.StartDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Bitiş Tarihi</label>
+                <input type="date" name="EndDate" class="form-control"
+                       value="@(Model.Filter.EndDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Durum</label>
+                <select name="Status" class="form-select">
+                    <!option value="Tümü" @(string.IsNullOrEmpty(Model.Filter.Status) || Model.Filter.Status == "Tümü" ? "selected" : "")>Tümü</!option>
+                    <!option value="Başarılı" @(Model.Filter.Status == "Başarılı" ? "selected" : "")>Başarılı</!option>
+                    <!option value="Başarısız" @(Model.Filter.Status == "Başarısız" ? "selected" : "")>Başarısız</!option>
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">Filtrele</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Temizle</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Log Tablosu Kartı -->
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 160px;">Gönderim Tarihi</th>
+                        <th>Alıcı Abone</th>
+                        <th>E-Posta Şablonu</th>
+                        <th>Gönderen</th>
+                        <th style="width: 110px;">Durum</th>
+                        <th>Hata Açıklaması</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Logs.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">Filtre kriterlerine uygun gönderim kaydı bulunamadı.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var log in Model.Logs)
+                        {
+                            <tr>
+                                <td>@log.SentAt.ToString("dd.MM.yyyy HH:mm:ss")</td>
+                                <td><strong>@log.SubscriberEmail</strong></td>
+                                <td>@log.TemplateTitle</td>
+                                <td>@log.UserFullName</td>
+                                <td>
+                                    @if (log.Status == "Başarılı")
+                                    {
+                                        <span class="badge bg-success">Başarılı</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Başarısız</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(log.ErrorMessage))
+                                    {
+                                        <span class="text-danger small" title="@log.ErrorMessage">
+                                            @log.ErrorMessage
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
