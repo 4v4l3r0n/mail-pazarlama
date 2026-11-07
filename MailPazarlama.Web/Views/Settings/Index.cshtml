@@ -1,6 +1,6 @@
 @model MailSettingDto
 @{
-    ViewData["Title"] = "E-Posta (SMTP) Ayarları";
+    ViewData["Title"] = "Tanım Sayfası";
 }
 
 <div class="row justify-content-center">
@@ -8,7 +8,7 @@
         <div class="card shadow-sm border-0">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="card-title mb-0">SMTP Sunucu Ayarları</h3>
+                    <h3 class="card-title mb-0">Tanım Sayfası</h3>
                     @if (Model.UpdatedAt > DateTime.MinValue)
                     {
                         <span class="badge bg-light text-dark border">
@@ -55,7 +55,7 @@
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Ayarları Kaydet</button>
+                        <button type="submit" class="btn btn-primary">Kaydet</button>
                     </div>
                 </form>
             </div>

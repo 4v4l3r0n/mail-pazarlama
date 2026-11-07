@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 using MailPazarlama.Business.Common;
 using MailPazarlama.Business.DTOs.Subscriber;
 using MailPazarlama.Data.UnitOfWork;
@@ -17,6 +19,11 @@ public class SubscriberService : ISubscriberService
 
     public async Task<ServiceResult<SubscriberDto>> AddSubscriberAsync(SubscriberCreateDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.Email) || !Regex.IsMatch(dto.Email.Trim(), @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
+        {
+            return ServiceResult<SubscriberDto>.Fail("Geçerli bir e-posta formatı giriniz (örn: isim@alanadi.com).");
+        }
+
         var normalizedEmail = dto.Email.Trim().ToLower();
         var existingSubscribers = await _unitOfWork.Repository<SubscriberEntity>()
             .FindAsync(s => s.Email.ToLower() == normalizedEmail);
@@ -29,7 +36,7 @@ public class SubscriberService : ISubscriberService
         var subscriber = new SubscriberEntity
         {
             Email = normalizedEmail,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now
         };
 
         await _unitOfWork.Repository<SubscriberEntity>().AddAsync(subscriber);
@@ -40,7 +47,35 @@ public class SubscriberService : ISubscriberService
 
     public async Task<IReadOnlyList<SubscriberDto>> GetAllSubscribersAsync()
     {
-        var subscribers = await _unitOfWork.Repository<SubscriberEntity>().GetAllAsync();
+        return await GetSubscribersAsync(null);
+    }
+
+    public async Task<IReadOnlyList<SubscriberDto>> GetSubscribersAsync(SubscriberFilterDto? filter)
+    {
+        var query = _unitOfWork.Repository<SubscriberEntity>().Query();
+
+        if (filter != null)
+        {
+            if (!string.IsNullOrWhiteSpace(filter.Email))
+            {
+                var search = filter.Email.Trim().ToLower();
+                query = query.Where(s => s.Email.ToLower().Contains(search));
+            }
+
+            if (filter.StartDate.HasValue)
+            {
+                var start = filter.StartDate.Value.Date;
+                query = query.Where(s => s.CreatedAt >= start);
+            }
+
+            if (filter.EndDate.HasValue)
+            {
+                var endOfDay = filter.EndDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(s => s.CreatedAt <= endOfDay);
+            }
+        }
+
+        var subscribers = await query.OrderByDescending(s => s.CreatedAt).ToListAsync();
         return subscribers.Select(MapToDto).ToList();
     }
 

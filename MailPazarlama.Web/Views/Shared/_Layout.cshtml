@@ -27,7 +27,7 @@
                                 <a class="nav-link" asp-controller="Templates" asp-action="Index">Şablonlar</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="SendMail" asp-action="Index">Mail Gönder</a>
+                                <a class="nav-link" asp-controller="SendMail" asp-action="Index">Gönderim</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Reports" asp-action="Index">Raporlar</a>
@@ -36,13 +36,7 @@
                                 <a class="nav-link" asp-controller="Users" asp-action="Index">Kullanıcılar</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Settings" asp-action="Index">Ayarlar</a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Index">Abone Ol</a>
+                                <a class="nav-link" asp-controller="Settings" asp-action="Index">Tanım</a>
                             </li>
                         }
                     </ul>
@@ -53,6 +47,7 @@
                                 <span>Hoş geldiniz, <strong>@User.Identity.Name</strong></span>
                             </li>
                             <li class="nav-item">
+                                <a class="btn btn-outline-light btn-sm me-2" asp-controller="Profile" asp-action="Index">Profil</a>
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-outline-light btn-sm">Çıkış Yap</button>
                                 </form>
@@ -96,7 +91,7 @@
 
     <footer class="border-top py-3 mt-auto text-center text-muted bg-light">
         <div class="container">
-            &copy; @DateTime.UtcNow.Year - Mail Pazarlama
+            &copy; @DateTime.Now.Year - Mail Pazarlama
         </div>
     </footer>
 

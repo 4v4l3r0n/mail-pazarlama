@@ -12,4 +12,5 @@ public interface IUserService
     Task<ServiceResult<UserDto>> GetByIdAsync(int id);
     Task<ServiceResult> ToggleStatusAsync(int userId);
     Task<ServiceResult> UpdateProfileAsync(int userId, UserProfileDto dto);
+    Task<bool> CheckEmailExistsAsync(string email);
 }

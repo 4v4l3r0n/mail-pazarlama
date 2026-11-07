@@ -3,27 +3,27 @@
     ViewData["Title"] = "Bültenimize Abone Olun";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4 text-center">
-                <h3 class="card-title mb-3">Bültenimize Abone Olun</h3>
-                <p class="text-muted mb-4">
-                    En son duyuru, kampanya ve güncellemelerden anında haberdar olmak için e-posta adresinizi bırakın.
-                </p>
+<div class="row align-items-center py-4 my-2">
+    <div class="col-md-6 pe-lg-4">
+        <h2 class="fw-bold mb-2">Mail Pazarlama Uygulaması</h2>
+        <p class="text-muted mb-4 fs-6">
+            Abonelerinize toplu e-posta gönderin, duyuru ve kampanyalarınızı kolayca yönetin.
+        </p>
 
-                <form asp-action="Index" method="post">
-                    <div class="mb-3 text-start">
-                        <label asp-for="Email" class="form-label">E-Posta Adresiniz</label>
-                        <input asp-for="Email" class="form-control form-control-lg" placeholder="ornek@alanadi.com" />
-                        <span asp-validation-for="Email" class="text-danger small"></span>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">Abone Ol</button>
-                    </div>
-                </form>
-            </div>
+        <div class="card p-3 bg-light border" style="max-width: 430px;">
+            <h5 class="mb-3">Bültene Abone Ol</h5>
+            <form asp-action="Index" method="post">
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label text-muted small">E-Posta Adresi</label>
+                    <input asp-for="Email" class="form-control" placeholder="ornek@alanadi.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn btn-primary px-4">Abone Ol</button>
+            </form>
         </div>
+    </div>
+    <div class="col-md-6 text-center ps-lg-4">
+        <img src="~/images/hero.jpg" alt="Mail Pazarlama" class="img-fluid rounded shadow-sm" style="max-height: 360px;" />
     </div>
 </div>
 

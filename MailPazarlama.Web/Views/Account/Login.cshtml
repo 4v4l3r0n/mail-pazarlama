@@ -23,6 +23,9 @@
                         <label asp-for="Password" class="form-label">Şifre</label>
                         <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
                         <span asp-validation-for="Password" class="text-danger small"></span>
+                        <div class="text-end mt-1">
+                            <a asp-action="ForgotPassword" class="small text-decoration-none">Şifremi Unuttum</a>
+                        </div>
                     </div>
 
                     <div class="d-grid gap-2 mt-4">

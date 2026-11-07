@@ -68,7 +68,7 @@ public class MailSettingService : IMailSettingService
                 EncryptedPassword = !string.IsNullOrEmpty(dto.Password)
                     ? _encryptionService.Encrypt(dto.Password)
                     : string.Empty,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.Now
             };
 
             await _unitOfWork.Repository<MailSettingEntity>().AddAsync(setting);
@@ -85,7 +85,7 @@ public class MailSettingService : IMailSettingService
                 setting.EncryptedPassword = _encryptionService.Encrypt(dto.Password);
             }
 
-            setting.UpdatedAt = DateTime.UtcNow;
+            setting.UpdatedAt = DateTime.Now;
 
             _unitOfWork.Repository<MailSettingEntity>().Update(setting);
         }

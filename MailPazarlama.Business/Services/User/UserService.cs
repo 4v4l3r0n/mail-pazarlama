@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using MailPazarlama.Business.Common;
 using MailPazarlama.Business.DTOs.User;
 using MailPazarlama.Business.Services.Security;
@@ -24,6 +25,11 @@ public class UserService : IUserService
             return ServiceResult<UserDto>.Fail("Şifre en az 8 karakter uzunluğunda olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.");
         }
 
+        if (string.IsNullOrWhiteSpace(dto.Email) || !Regex.IsMatch(dto.Email.Trim(), @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
+        {
+            return ServiceResult<UserDto>.Fail("Geçerli bir e-posta formatı giriniz (örn: isim@alanadi.com).");
+        }
+
         var normalizedEmail = dto.Email.Trim().ToLower();
         var existingUsers = await _unitOfWork.Repository<UserEntity>().FindAsync(u => u.Email.ToLower() == normalizedEmail);
         if (existingUsers.Count > 0)
@@ -38,7 +44,7 @@ public class UserService : IUserService
             Email = normalizedEmail,
             EncryptedPassword = _encryptionService.Encrypt(dto.Password),
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now
         };
 
         await _unitOfWork.Repository<UserEntity>().AddAsync(user);
@@ -136,6 +142,11 @@ public class UserService : IUserService
             return ServiceResult.Fail("Kullanıcı bulunamadı.");
         }
 
+        if (string.IsNullOrWhiteSpace(dto.Email) || !Regex.IsMatch(dto.Email.Trim(), @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
+        {
+            return ServiceResult.Fail("Geçerli bir e-posta formatı giriniz (örn: isim@alanadi.com).");
+        }
+
         var normalizedEmail = dto.Email.Trim().ToLower();
         if (!string.Equals(user.Email, normalizedEmail, StringComparison.OrdinalIgnoreCase))
         {
@@ -147,13 +158,29 @@ public class UserService : IUserService
             user.Email = normalizedEmail;
         }
 
+        if (string.IsNullOrWhiteSpace(dto.Password) || !IsPasswordValid(dto.Password))
+        {
+            return ServiceResult.Fail("Parola en az 8 karakter uzunluğunda olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.");
+        }
+
         user.FirstName = dto.FirstName.Trim();
         user.LastName = dto.LastName.Trim();
+        user.EncryptedPassword = _encryptionService.Encrypt(dto.Password);
 
         _unitOfWork.Repository<UserEntity>().Update(user);
         await _unitOfWork.SaveChangesAsync();
 
-        return ServiceResult.Ok("Profil başarıyla güncellendi.");
+        return ServiceResult.Ok("Profiliniz başarıyla güncellendi.");
+    }
+
+    public async Task<bool> CheckEmailExistsAsync(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        var normalizedEmail = email.Trim().ToLower();
+        var users = await _unitOfWork.Repository<UserEntity>().FindAsync(u => u.Email.ToLower() == normalizedEmail);
+        return users.Count > 0;
     }
 
     private static bool IsPasswordValid(string password)

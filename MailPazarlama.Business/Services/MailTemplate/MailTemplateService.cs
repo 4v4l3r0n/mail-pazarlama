@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MailPazarlama.Business.Common;
 using MailPazarlama.Business.DTOs.MailTemplate;
 using MailPazarlama.Data.UnitOfWork;
@@ -23,7 +24,7 @@ public class MailTemplateService : IMailTemplateService
             ContentHtml = dto.ContentHtml,
             UserId = dto.UserId,
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now
         };
 
         await _unitOfWork.Repository<MailTemplateEntity>().AddAsync(template);
@@ -51,13 +52,22 @@ public class MailTemplateService : IMailTemplateService
 
     public async Task<IReadOnlyList<MailTemplateDto>> GetAllTemplatesAsync()
     {
-        var templates = await _unitOfWork.Repository<MailTemplateEntity>().GetAllAsync();
+        var templates = await _unitOfWork.Repository<MailTemplateEntity>().Query()
+            .Include(t => t.User)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToListAsync();
+
         return templates.Select(MapToDto).ToList();
     }
 
     public async Task<IReadOnlyList<MailTemplateDto>> GetActiveTemplatesAsync()
     {
-        var templates = await _unitOfWork.Repository<MailTemplateEntity>().FindAsync(t => t.IsActive);
+        var templates = await _unitOfWork.Repository<MailTemplateEntity>().Query()
+            .Include(t => t.User)
+            .Where(t => t.IsActive)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToListAsync();
+
         return templates.Select(MapToDto).ToList();
     }
 
@@ -117,7 +127,10 @@ public class MailTemplateService : IMailTemplateService
             ContentHtml = template.ContentHtml,
             IsActive = template.IsActive,
             CreatedAt = template.CreatedAt,
-            UserId = template.UserId
+            UserId = template.UserId,
+            CreatedByUserName = template.User != null 
+                ? $"{template.User.FirstName} {template.User.LastName}".Trim() 
+                : string.Empty
         };
     }
 }

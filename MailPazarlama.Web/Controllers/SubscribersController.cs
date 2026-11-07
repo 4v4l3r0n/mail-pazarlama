@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MailPazarlama.Business.DTOs.Subscriber;
 using MailPazarlama.Business.Services.Subscriber;
+using MailPazarlama.Web.Models;
 
 namespace MailPazarlama.Web.Controllers;
 
@@ -16,10 +17,18 @@ public class SubscribersController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index([FromQuery] SubscriberFilterDto? filter)
     {
-        var subscribers = await _subscriberService.GetAllSubscribersAsync();
-        return View(subscribers);
+        filter ??= new SubscriberFilterDto();
+        var subscribers = await _subscriberService.GetSubscribersAsync(filter);
+
+        var viewModel = new SubscribersViewModel
+        {
+            Filter = filter,
+            Subscribers = subscribers
+        };
+
+        return View(viewModel);
     }
 
     [HttpPost]

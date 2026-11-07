@@ -8,4 +8,5 @@ public class MailTemplateDto
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public int UserId { get; set; }
+    public string CreatedByUserName { get; set; } = string.Empty;
 }

@@ -1,0 +1,64 @@
+@model MailPazarlama.Business.DTOs.User.UserProfileDto
+@{
+    ViewData["Title"] = "Profil Sayfası";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6" style="max-width: 600px;">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h3 class="card-title text-center mb-3">Profil Sayfası</h3>
+                <p class="text-muted small text-center mb-4">
+                    Kişisel bilgilerinizi ve parolanızı bu sayfadan güncelleyebilirsiniz.
+                </p>
+
+                <form asp-action="Index" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FirstName" class="form-label">Ad</label>
+                            <input asp-for="FirstName" class="form-control" placeholder="Adınız" autofocus />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LastName" class="form-label">Soyad</label>
+                            <input asp-for="LastName" class="form-control" placeholder="Soyadınız" />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">E-Posta Adresi</label>
+                        <input asp-for="Email" class="form-control" placeholder="ornek@alanadi.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label">Yeni Parola</label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="En az 8 karakter, büyük-küçük harf ve rakam" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                        <div class="form-text">Profil bilgilerinizi kaydetmek için geçerli parolanızı veya yeni parolanızı giriniz.</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Bilgileri Güncelle</button>
+                    </div>
+                </form>
+
+                <hr class="my-4" />
+
+                <div class="text-center">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none small">
+                        &larr; Ana Sayfaya Dön
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MailPazarlama.Business.DTOs.User;
 using MailPazarlama.Business.Services.User;
+using MailPazarlama.Web.Models;
 
 namespace MailPazarlama.Web.Controllers;
 
@@ -44,7 +45,6 @@ public class AccountController : Controller
         var result = await _userService.LoginAsync(dto);
         if (!result.Success || result.Data == null)
         {
-            TempData["Error"] = result.Message;
             ModelState.AddModelError(string.Empty, result.Message);
             return View(dto);
         }
@@ -77,7 +77,7 @@ public class AccountController : Controller
     {
         if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            return RedirectToAction("Index", "Subscribers");
+            return RedirectToAction("Index", "Home");
         }
 
         return View(new UserRegisterDto());
@@ -95,7 +95,6 @@ public class AccountController : Controller
         var result = await _userService.RegisterAsync(dto);
         if (!result.Success)
         {
-            TempData["Error"] = result.Message;
             ModelState.AddModelError(string.Empty, result.Message);
             return View(dto);
         }
@@ -113,6 +112,75 @@ public class AccountController : Controller
         return RedirectToAction(nameof(Login));
     }
 
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        return View(new ForgotPasswordViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model, string action)
+    {
+        if (action == "verify")
+        {
+            if (string.IsNullOrWhiteSpace(model.Email))
+            {
+                ModelState.AddModelError("Email", "Lütfen e-posta adresinizi giriniz.");
+                model.IsEmailVerified = false;
+                return View(model);
+            }
+
+            var exists = await _userService.CheckEmailExistsAsync(model.Email);
+            if (!exists)
+            {
+                ModelState.AddModelError("Email", "Kullanıcı bilgisi bulunamadı.");
+                model.IsEmailVerified = false;
+                return View(model);
+            }
+
+            model.IsEmailVerified = true;
+            ModelState.Clear();
+            return View(model);
+        }
+
+        if (action == "reset")
+        {
+            model.IsEmailVerified = true;
+
+            if (string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                ModelState.AddModelError("NewPassword", "Yeni şifre alanı zorunludur.");
+                return View(model);
+            }
+
+            if (model.NewPassword != model.ConfirmNewPassword)
+            {
+                ModelState.AddModelError("ConfirmNewPassword", "Şifreler eşleşmiyor.");
+                return View(model);
+            }
+
+            var resetDto = new ResetPasswordDto
+            {
+                Email = model.Email,
+                NewPassword = model.NewPassword,
+                ConfirmNewPassword = model.ConfirmNewPassword ?? string.Empty
+            };
+
+            var result = await _userService.ResetPasswordAsync(resetDto);
+            if (!result.Success)
+            {
+                ModelState.AddModelError(string.Empty, result.Message);
+                return View(model);
+            }
+
+            TempData["Success"] = "Parolanız başarıyla güncellendi. Lütfen giriş yapınız.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        return View(model);
+    }
+
     private IActionResult RedirectToLocal(string? returnUrl)
     {
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -120,6 +188,6 @@ public class AccountController : Controller
             return Redirect(returnUrl);
         }
 
-        return RedirectToAction("Index", "Subscribers");
+        return RedirectToAction("Index", "Home");
     }
 }

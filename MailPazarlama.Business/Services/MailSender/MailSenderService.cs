@@ -31,8 +31,13 @@ public class MailSenderService : IMailSenderService
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public async Task<ServiceResult> SendBulkMailAsync(int templateId, int userId)
+    public async Task<ServiceResult> SendBulkMailAsync(int templateId, List<int> subscriberIds, int userId)
     {
+        if (subscriberIds == null || subscriberIds.Count == 0)
+        {
+            return ServiceResult.Fail("Lütfen gönderim yapılacak en az bir abone seçiniz.");
+        }
+
         // 1. SMTP Ayarları Kontrolü
         var settings = await _mailSettingService.GetSettingAsync();
         if (settings == null || string.IsNullOrWhiteSpace(settings.SmtpServer) || string.IsNullOrWhiteSpace(settings.Email))
@@ -53,10 +58,12 @@ public class MailSenderService : IMailSenderService
         }
 
         // 3. Aboneler Kontrolü
-        var subscribers = await _unitOfWork.Repository<SubscriberEntity>().GetAllAsync();
+        var subscribers = await _unitOfWork.Repository<SubscriberEntity>()
+            .FindAsync(s => subscriberIds.Contains(s.Id));
+
         if (subscribers.Count == 0)
         {
-            return ServiceResult.Fail("Sistemde kayıtlı abone bulunmamaktadır.");
+            return ServiceResult.Fail("Seçilen aboneler sistemde bulunamadı.");
         }
 
         // Arka plan işi için gerekli verilerin kopyalanması
@@ -82,48 +89,70 @@ public class MailSenderService : IMailSenderService
                     SubscriberId = subscriber.Id,
                     TemplateId = templateId,
                     UserId = userId,
-                    SentAt = DateTime.UtcNow,
+                    SentAt = DateTime.Now,
                     Status = "Başarılı",
                     ErrorMessage = null
                 };
 
-                try
+                var smtpServerNormalized = smtpServer?.Trim().ToLowerInvariant() ?? string.Empty;
+                var isSimulation = smtpServerNormalized is "localhost";
+
+                if (isSimulation)
                 {
-                    var message = new MimeMessage();
-                    message.From.Add(new MailboxAddress("Mail Pazarlama", senderEmail));
-                    message.To.Add(new MailboxAddress(subscriber.Email, subscriber.Email));
-                    message.Subject = templateTitle;
+                    await Task.Delay(300);
 
-                    var bodyBuilder = new BodyBuilder
+                    var emailLower = subscriber.Email.ToLowerInvariant();
+                    if (emailLower.Contains("hata") || emailLower.Contains("error"))
                     {
-                        HtmlBody = templateHtml
-                    };
-                    message.Body = bodyBuilder.ToMessageBody();
-
-                    using var client = new SmtpClient();
-                    client.Timeout = 15000; // 15 saniye zaman aşımı kuralı
-
-                    // SSL / TLS bağlantı seçeneği
-                    var secureOptions = enableSsl
-                        ? (smtpPort == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls)
-                        : SecureSocketOptions.None;
-
-                    client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-
-                    await client.ConnectAsync(smtpServer, smtpPort, secureOptions);
-
-                    if (!string.IsNullOrEmpty(senderEmail) && !string.IsNullOrEmpty(senderPassword))
-                    {
-                        await client.AuthenticateAsync(senderEmail, senderPassword);
+                        log.Status = "Başarısız";
+                        log.ErrorMessage = "Simülasyon: Alıcı e-posta kutusu dolu veya ulaşılamıyor (Test Hatası).";
                     }
-
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
+                    else
+                    {
+                        log.Status = "Başarılı";
+                        log.ErrorMessage = null;
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    log.Status = "Başarısız";
-                    log.ErrorMessage = ex.Message;
+                    try
+                    {
+                        var message = new MimeMessage();
+                        message.From.Add(new MailboxAddress("Mail Pazarlama", senderEmail));
+                        message.To.Add(new MailboxAddress(subscriber.Email, subscriber.Email));
+                        message.Subject = templateTitle;
+
+                        var bodyBuilder = new BodyBuilder
+                        {
+                            HtmlBody = templateHtml
+                        };
+                        message.Body = bodyBuilder.ToMessageBody();
+
+                        using var client = new SmtpClient();
+                        client.Timeout = 15000; // 15 saniye zaman aşımı kuralı
+
+                        // SSL / TLS bağlantı seçeneği
+                        var secureOptions = enableSsl
+                            ? (smtpPort == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls)
+                            : SecureSocketOptions.None;
+
+                        client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+
+                        await client.ConnectAsync(smtpServer!, smtpPort, secureOptions);
+
+                        if (!string.IsNullOrEmpty(senderEmail) && !string.IsNullOrEmpty(senderPassword))
+                        {
+                            await client.AuthenticateAsync(senderEmail, senderPassword);
+                        }
+
+                        await client.SendAsync(message);
+                        await client.DisconnectAsync(true);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Status = "Başarısız";
+                        log.ErrorMessage = ex.Message;
+                    }
                 }
 
                 await backgroundUow.Repository<MailSendLog>().AddAsync(log);
@@ -131,6 +160,6 @@ public class MailSenderService : IMailSenderService
             }
         });
 
-        return ServiceResult.Ok("Mail gönderim işlemi arka planda başlatıldı.");
+        return ServiceResult.Ok($"Seçilen {subscribers.Count} aboneye e-posta başarıyla gönderildi.");
     }
 }

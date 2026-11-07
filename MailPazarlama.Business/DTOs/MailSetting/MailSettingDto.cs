@@ -19,6 +19,7 @@ public class MailSettingDto
     [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz.")]
     public string Email { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Parola alanı zorunludur.")]
     public string Password { get; set; } = string.Empty;
 
     public DateTime UpdatedAt { get; set; }

@@ -4,5 +4,5 @@ namespace MailPazarlama.Business.Services.MailSender;
 
 public interface IMailSenderService
 {
-    Task<ServiceResult> SendBulkMailAsync(int templateId, int userId);
+    Task<ServiceResult> SendBulkMailAsync(int templateId, List<int> subscriberIds, int userId);
 }

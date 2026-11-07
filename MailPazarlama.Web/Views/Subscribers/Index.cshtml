@@ -1,11 +1,11 @@
-@model IReadOnlyList<SubscriberDto>
+@model MailPazarlama.Web.Models.SubscribersViewModel
 @{
     ViewData["Title"] = "Abone Yönetimi";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="h3 mb-0">Abone Listesi</h2>
-    <span class="badge bg-primary fs-6">Toplam: @Model.Count Abone</span>
+    <span class="badge bg-primary fs-6">Toplam: @Model.Subscribers.Count Abone</span>
 </div>
 
 <div class="card shadow-sm border-0 mb-4">
@@ -17,6 +17,32 @@
             </div>
             <div class="col-md-3 col-lg-2">
                 <button type="submit" class="btn btn-success w-100">Abone Ekle</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold">E-Posta Adresi</label>
+                <input type="text" name="Email" class="form-control" placeholder="E-posta ile ara..." 
+                       value="@Model.Filter.Email" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Başlangıç Tarihi</label>
+                <input type="date" name="StartDate" class="form-control" 
+                       value="@(Model.Filter.StartDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Bitiş Tarihi</label>
+                <input type="date" name="EndDate" class="form-control" 
+                       value="@(Model.Filter.EndDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">Filtrele</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Temizle</a>
             </div>
         </form>
     </div>
@@ -35,7 +61,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model.Count == 0)
+                    @if (Model.Subscribers.Count == 0)
                     {
                         <tr>
                             <td colspan="4" class="text-center text-muted py-4">Kayıtlı abone bulunamadı.</td>
@@ -43,7 +69,7 @@
                     }
                     else
                     {
-                        @foreach (var subscriber in Model)
+                        @foreach (var subscriber in Model.Subscribers)
                         {
                             <tr>
                                 <td>@subscriber.Id</td>

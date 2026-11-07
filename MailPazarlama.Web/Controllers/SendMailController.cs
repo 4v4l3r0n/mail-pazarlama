@@ -33,8 +33,8 @@ public class SendMailController : Controller
 
         var viewModel = new SendMailViewModel
         {
-            SubscriberCount = subscribers.Count,
-            ActiveTemplates = activeTemplates
+            ActiveTemplates = activeTemplates,
+            Subscribers = subscribers
         };
 
         return View(viewModel);
@@ -42,11 +42,17 @@ public class SendMailController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Send(int templateId)
+    public async Task<IActionResult> Send(int templateId, List<int> selectedSubscriberIds)
     {
         if (templateId <= 0)
         {
             TempData["Error"] = "Lütfen gönderim yapılacak geçerli bir şablon seçiniz.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (selectedSubscriberIds == null || selectedSubscriberIds.Count == 0)
+        {
+            TempData["Error"] = "Lütfen gönderim yapılacak en az bir abone seçiniz.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -57,7 +63,7 @@ public class SendMailController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        var result = await _mailSenderService.SendBulkMailAsync(templateId, userId);
+        var result = await _mailSenderService.SendBulkMailAsync(templateId, selectedSubscriberIds, userId);
         if (result.Success)
         {
             TempData["Success"] = result.Message;
